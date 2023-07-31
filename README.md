@@ -1,5 +1,5 @@
 # near-social-bot
-OpenAI based bot for NEAR Social
+bot for NEAR Social
 
 Add `.env` file:
 ```env
