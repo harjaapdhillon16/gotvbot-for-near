@@ -40,7 +40,7 @@ const verifyIsHuman = async (nearInstance, accountId) => {
     const { isHuman, accountId } = await verifyIsHuman(near, item.accountId);
     console.log(isHuman, accountId, item);
     if (!accountRepliedTo.includes(accountId)) {
-      if (isHuman) {
+      if (!isHuman) {
         social.comment(
           {
             type: "social",
@@ -56,6 +56,12 @@ const verifyIsHuman = async (nearInstance, accountId) => {
           }
         );
       } else {
+        const allCommentTypes = [
+          "Are you ready to be part of the NEAR Election? Don’t forget to register on https://i-am-human.app and vote in the NDC Election starting September 8th! 🌐🗳️🙌",
+          "Are you ready to be part of the next big thing? Say hello to https://i-am-human.app, and start collecting your reputation Soul Bound Tokens! 🌐🙌",
+          "Reclaim Your Digital Identity: With https://i-am-human.app, make genuine connections with others who value authenticity of real humans. 🚀🤝",
+        ];
+        let randomNumber = Math.floor(Math.random() * 3);
         social.comment(
           {
             type: "social",
@@ -65,7 +71,7 @@ const verifyIsHuman = async (nearInstance, accountId) => {
               ipfs: "bafkreigpacjefuqlirwwtvaoziyo2puqdtx2cebga2silbqhfftx3fwdje",
             },
           },
-          `Hey @${item.accountId}, remember to register as a Human at https://i-am-human.app to be a member of the @neardigitalcollective.near voting body. Elections start at Sep 8, see all the nominated candidates at https://neardc.org/nominate.`,
+          allCommentTypes[randomNumber],
           undefined,
           item.accountId
         );
