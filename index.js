@@ -40,7 +40,7 @@ const verifyIsHuman = async (nearInstance, accountId) => {
     const { isHuman, accountId } = await verifyIsHuman(near, item.accountId);
     console.log(isHuman, accountId, item);
     if (!accountRepliedTo.includes(accountId)) {
-      if (!isHuman) {
+      if (isHuman) {
         social.comment(
           {
             type: "social",
