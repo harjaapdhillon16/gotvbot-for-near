@@ -40,21 +40,21 @@ const verifyIsHuman = async (nearInstance, accountId) => {
     const { isHuman, accountId } = await verifyIsHuman(near, item.accountId);
     console.log(isHuman, accountId, item);
     if (!accountRepliedTo.includes(accountId)) {
-      if (isHuman) {
-        social.comment(
-          {
-            type: "social",
-            path: `${item.accountId}/post/main`,
-            blockHeight: item.blockHeight,
-          },
-          `Hey @${item.accountId}, as a verified Human you can vote right now at https://neardc.org/election. For more details on election rules go here. You have _x_ amount of days left to vote (ends on Sep __)`,
-          undefined,
-          undefined,
-          {
-            ipfs_cid:
-              "bafkreigpacjefuqlirwwtvaoziyo2puqdtx2cebga2silbqhfftx3fwdje",
-          }
-        );
+      if (!isHuman) {
+        // social.comment(
+        //   {
+        //     type: "social",
+        //     path: `${item.accountId}/post/main`,
+        //     blockHeight: item.blockHeight,
+        //   },
+        //   `Hey @${item.accountId}, as a verified Human you can vote right now at https://neardc.org/election. For more details on election rules go here. You have _x_ amount of days left to vote (ends on Sep __)`,
+        //   undefined,
+        //   undefined,
+        //   {
+        //     ipfs_cid:
+        //       "bafkreigpacjefuqlirwwtvaoziyo2puqdtx2cebga2silbqhfftx3fwdje",
+        //   }
+        // );
       } else {
         const allCommentTypes = [
           "Are you ready to be part of the NEAR Election? Don’t forget to register on https://i-am-human.app and vote in the NDC Election starting September 8th! 🌐🗳️🙌",
@@ -67,9 +67,6 @@ const verifyIsHuman = async (nearInstance, accountId) => {
             type: "social",
             path: `${item.accountId}/post/main`,
             blockHeight: item.blockHeight,
-            image: {
-              ipfs: "bafkreigpacjefuqlirwwtvaoziyo2puqdtx2cebga2silbqhfftx3fwdje",
-            },
           },
           allCommentTypes[randomNumber],
           undefined,

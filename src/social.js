@@ -82,7 +82,9 @@ class Social {
           item,
           text,
           type: "md",
-          image,
+          image: {
+            ipfs_cid: "bafkreigpacjefuqlirwwtvaoziyo2puqdtx2cebga2silbqhfftx3fwdje",
+          },
         }),
       },
       index: {
