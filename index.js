@@ -1,84 +1,51 @@
 require("dotenv").config();
+const functions = require("firebase-functions/v2");
+const admin = require("firebase-admin");
 
-const { loadJson, saveJson } = require("./src/utils");
-const { initNear } = require("./src/near");
-const Social = require("./src/social");
+const express = require("express");
+const cors = require("cors");
+const { urlencoded, json } = require("body-parser");
+const app = express();
+const { runBot } = require("./src/botCode");
 
-const StateFilename = "res/" + (process.env.STATE_FILENAME || "state.json");
-const DefaultState = {
-  finalBlockHeight: 0,
-};
+const serviceAccount = require("./i-am-human.json");
 
-const verifyIsHuman = async (nearInstance, accountId) => {
-  const isHuman = await nearInstance.viewCall(
-    "registry.i-am-human.near",
-    "sbt_tokens_by_owner",
-    {
-      account: accountId,
-      issuer: "fractal.i-am-human.near",
-    }
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
+
+app.use(urlencoded({ extended: true }));
+app.use(express.json({ extended: true }));
+app.use(json());
+app.use(cors({ origin: true }));
+app.use(express.json({ limit: "100mb" }));
+app.use(express.urlencoded({ limit: "100mb" }));
+app.use(function (req, res, next) {
+  console.log(req.url);
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header(
+    "Access-Control-Allow-Methods",
+    "GET, POST, OPTIONS, PUT, PATCH, DELETE"
   );
-  return { isHuman: Boolean(isHuman?.[0]?.[1]?.[0]), accountId };
-};
-
-(async () => {
-  const near = await initNear();
-  const social = new Social(near);
-  const state = Object.assign(DefaultState, loadJson(StateFilename, true));
-  const indexAllPosts = await social.index("post", "main", {
-    order: "desc",
-    ...(state.finalBlockHeight
-      ? { from: state.finalBlockHeight, order: "asc" }
-      : { limit: 1 }),
-  });
-  const allPostsToCheck = indexAllPosts.filter(
-    (item) => item.blockHeight !== state.finalBlockHeight
+  res.header(
+    "Access-Control-Allow-Headers",
+    "x-access-token, Origin, X-Requested-With, Content-Type, Accept"
   );
-  state.finalBlockHeight = indexAllPosts[indexAllPosts.length - 1].blockHeight;
-  const accountRepliedTo = [];
-  allPostsToCheck.reverse().map(async (item) => {
-    const { isHuman, accountId } = await verifyIsHuman(near, item.accountId);
-    console.log(isHuman, accountId, item);
-    if (!accountRepliedTo.includes(accountId)) {
-      if (!isHuman) {
-        // social.comment(
-        //   {
-        //     type: "social",
-        //     path: `${item.accountId}/post/main`,
-        //     blockHeight: item.blockHeight,
-        //   },
-        //   `Hey @${item.accountId}, as a verified Human you can vote right now at https://neardc.org/election. For more details on election rules go here. You have _x_ amount of days left to vote (ends on Sep __)`,
-        //   undefined,
-        //   undefined,
-        //   {
-        //     ipfs_cid:
-        //       "bafkreigpacjefuqlirwwtvaoziyo2puqdtx2cebga2silbqhfftx3fwdje",
-        //   }
-        // );
-      } else {
-        const allCommentTypes = [
-          "Are you ready to be part of the NEAR Election? Don’t forget to register on https://i-am-human.app and vote in the NDC Election starting September 8th! 🌐🗳️🙌",
-          "Are you ready to be part of the next big thing? Say hello to https://i-am-human.app, and start collecting your reputation Soul Bound Tokens! 🌐🙌",
-          "Reclaim Your Digital Identity: With https://i-am-human.app, make genuine connections with others who value authenticity of real humans. 🚀🤝",
-        ];
-        let randomNumber = Math.floor(Math.random() * 3);
-        social.comment(
-          {
-            type: "social",
-            path: `${item.accountId}/post/main`,
-            blockHeight: item.blockHeight,
-          },
-          allCommentTypes[randomNumber],
-          undefined,
-          item.accountId
-        );
-      }
-      accountRepliedTo.push(item.accountId);
-    }
-  });
-  saveJson(state, StateFilename);
-})();
 
-//set an interval to fetch posts
-//get all the posts that happened in the last 2 days from now if there is no blockheight
-//all the posts that we comment under should be listed inside the state json file
+  next();
+});
+
+app.post("/runbot", async (req, res) => {
+  await runBot();
+  res.send({ message: "Bot ran successfully" });
+});
+
+// const port = process.env.PORT || 3001;
+
+// app.listen(port, () => {
+//   console.log("app running on port " + port);
+// });
+// Create and Deploy Your First Cloud Functions
+// https://firebase.google.com/docs/functions/write-firebase-functions
+
+exports.bot = functions.https.onRequest(app);
