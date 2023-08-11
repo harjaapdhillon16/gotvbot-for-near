@@ -4,4 +4,4 @@ yarn\.lock
 logs
 res/
 bots/
-./i-am-human.json
+i-am-human.json
