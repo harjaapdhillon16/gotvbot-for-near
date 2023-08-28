@@ -29,7 +29,7 @@ const runBot = async () => {
     order: "desc",
     ...(state.finalBlockHeight
       ? { from: state.finalBlockHeight, order: "asc" }
-      : { limit: 1 }),
+      : { limit: 20 }),
   });
   const allPostsToCheck = indexAllPosts.filter(
     (item) => item.blockHeight !== state.finalBlockHeight
